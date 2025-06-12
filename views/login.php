@@ -1,29 +1,37 @@
-<form method="POST" action="../controllers/AuthController.php">
-    <h2>Login</h2>
-    <input type="email" name="email" placeholder="Email" required><br>
-    <input type="password" name="password" placeholder="Password" required><br>
-    <button type="submit" name="login">Login</button>
-</form>
 <!DOCTYPE html>
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <title>Login - Manajemen Tugas</title>
-    <style>
-        body { font-family: Arial; background-color: #f4f4f4; display: flex; justify-content: center; align-items: center; height: 100vh; }
-        .login-box { background: white; padding: 2rem; border-radius: 8px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
-        input, button { display: block; margin-top: 10px; width: 100%; padding: 10px; }
-        button { background: #007bff; color: white; border: none; cursor: pointer; }
-    </style>
+    <title>Login - WORKDIF</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="../public/style.css">
+
 </head>
 <body>
-    <div class="login-box">
-        <h2>Login</h2>
-        <form method="POST" action="../controllers/AuthController.php">
-            <input type="email" name="email" placeholder="Email" required>
-            <input type="password" name="password" placeholder="Password" required>
-            <button type="submit" name="login">Masuk</button>
-        </form>
+    <div class="container-login">
+        <!-- Kiri: Tulisan tanpa kotak -->
+        <div class="left-text">
+            Selamat Datang di WORKDIF
+        </div>
+
+        <!-- Kanan: Form Login dalam kotak -->
+        <div class="login-box">
+            <h2 class="text-center mb-4 text-login">LOGIN</h2>
+
+            <?php if (isset($_GET['error'])): ?>
+                <div class="error-message">Email atau password salah.</div>
+            <?php endif; ?>
+
+            <form method="POST" action="../controllers/AuthController.php">
+                <div class="mb-3">
+                    <input type="email" name="email" class="form-control" placeholder="Email" required>
+                </div>
+                <div class="mb-3">
+                    <input type="password" name="password" class="form-control" placeholder="Password" required>
+                </div>
+                <button type="submit" name="login" class="btn btn-cyan w-100">Masuk</button>
+            </form>
+        </div>
     </div>
 </body>
 </html>
