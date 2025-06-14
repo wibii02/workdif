@@ -78,120 +78,48 @@ Beberapa peran trigger di sistem ini:
 Dengan adanya trigger di lapisan database, validasi tetap dijalankan secara otomatis, bahkan jika ada celah atau kelalaian dari sisi aplikasi. Ini selaras dengan prinsip reliabilitas pada sistem terdistribusi.
 
 ### 🔄 Transaction (Transaksi)
-Transaksi digunakan untuk memastikan bahwa operasi yang melibatkan beberapa tabel tetap konsisten. Misalnya, saat menghapus proyek, sistem akan menghapus data terkait dan mencatat log dalam satu transaksi.
+Transaksi digunakan untuk memastikan bahwa operasi yang melibatkan beberapa tabel tetap konsisten. Misalnya, saat menghapus task, sistem akan menghapus data terkait dan mencatat log dalam satu transaksi.
 
-`App\Models\Transaction.php`
-* Implementasi transaction untuk procedure `deposit_money`
+`views\tambah_task.php`
+* Implementasi transaction untuk procedure `task_baru`
   ```php
   try {
-      // Start a transaction
-      // This is important to ensure that the deposit is atomic
-      $this->conn->beginTransaction();
-      // Call the deposit_money stored procedure
-      $stmt = $this->conn->prepare("CALL deposit_money(?, ?, ?)");
-      $stmt->execute([
-          $txId,
-          $toAccount['account_number'],
-          $amount
-      ]);
+        $pdo->beginTransaction(); // Mulai transaksi untuk operasi atomik
 
-      $this->conn->commit();
-  } catch (PDOException $e) {
-      $this->conn->rollBack();
-      $errorInfo = $e->errorInfo ?? [];
-      $message = $errorInfo[2] ?? $e->getMessage();
+        $stmt1 = $pdo->prepare("INSERT INTO tasks (project_id, judul, deskripsi, assigned_to, status, deadline) VALUES (?, ?, ?, ?, ?, ?)");
+        $stmt1->execute([$project_id, $judul, $deskripsi, $assigned_to, $status, $deadline]);
 
-      throw new Exception("Deposit failed: SQLSTATE[{$errorInfo[0]}]: {$errorInfo[1]} {$message}");
-  }
-* Implementasi transaction untuk procedure `transfer_money`
-  ```php
-  try {
-      // Start a transaction
-      // This is important to ensure that the transfer is atomic
-      $this->conn->beginTransaction();
-      // Call the transfer_money stored procedure
-      $stmt = $this->conn->prepare("CALL transfer_money(?, ?, ?, ?)");
-      $stmt->execute([
-          $txId,
-          $fromAccount['account_number'],
-          $toAccountNumber,
-          $amount
-      ]);
+        $stmt2 = $pdo->prepare("INSERT INTO activity_logs (user_id, aksi) VALUES (?, ?)");
+        $aksi = 'Menambahkan task "' . $judul . '" untuk proyek ID ' . $project_id;
+        $stmt2->execute([$_SESSION['user_id'], $aksi]); // Log user yang membuat task
 
-      $this->conn->commit();
-  } catch (PDOException $e) {
-      $this->conn->rollBack();
-      $errorInfo = $e->errorInfo ?? [];
-      $message = $errorInfo[2] ?? $e->getMessage();
+        $pdo->commit(); // Commit transaksi jika semua berhasil
 
-      throw new Exception("Transfer failed: SQLSTATE[{$errorInfo[0]}]: {$errorInfo[1]} {$message}");
-  }
+        // PENTING: Redirect kembali ke halaman tugas proyek yang relevan melalui router
+        header("Location: index.php?route=project_tasks&project_id=" . htmlspecialchars($project_id) . "&success=task_added");
+        exit;
+    } catch (Exception $e) {
+        $pdo->rollBack(); // Rollback transaksi jika ada error
+        error_log("Gagal menambahkan task: " . $e->getMessage());
+        // PENTING: Redirect ke rute tambah_task dengan pesan error database
+        header("Location: index.php?route=tambah_task&project_id=" . htmlspecialchars($project_id) . "&error=db_error&msg=" . urlencode($e->getMessage()));
+        exit;
+    }
+
   ```
-Demikian pula saat user melakukan registrasi, sistem tidak hanya menyimpan data user, tetapi juga membuat akun bank sekaligus. Proses ini dijalankan dalam satu transaksi agar semua langkah saling bergantung dan terjamin konsistensinya.
+Metode transaction diatas adalah untuk memastikan task dan log aktivitas tercatat bersamaan karena jika salah satu gagal, dibatalkan semua
 
-`App\Models\User.php`
-```php
-try {
-    // Start a transaction
-    // This is important to ensure that the registration is atomic
-    $this->conn->beginTransaction();
 
-    $stmt = $this->conn->prepare("INSERT INTO users (username, password) VALUES (?, ?)");
-    $stmt->execute([$username, $hashedPassword]);
-    $userId = $this->conn->lastInsertId();
-
-    $accountNumber = $this->generateUniqueAccountNumber();
-    $stmtAcc = $this->conn->prepare("INSERT INTO accounts (user_id, account_number, balance) VALUES (?, ?, 0)");
-    $stmtAcc->execute([$userId, $accountNumber]);
-
-    $this->conn->commit();
-    return true;
-} catch (Exception $e) {
-    $this->conn->rollBack();
-    throw new Exception("Registration failed due to database error.");
-}
-```
 ### 📺 Stored Function 
-Stored function digunakan untuk mengambil informasi tanpa mengubah data. Seperti layar monitor: hanya menampilkan data, tidak mengubah apapun.
+Stored function digunakan untuk mengambil informasi tanpa mengubah data. Misalnya, function get_project_count(p_owner_id) mengembalikan jumlah proyek yang dimiliki oleh pengguna.
 
-Contohnya, function  `get_balance(p_account)` mengembalikan saldo terkini dari sebuah akun. 
+Contohnya, function  `TotalTaskUser(p_user_id)` mengembalikan total task yang dimiliki oleh pengguna dengan user_id tertentu.
 
-Function ini dipanggil baik dari aplikasi maupun dari procedure yang ada di database. Dengan begitu, logika pembacaan saldo tetap terpusat dan konsisten, tanpa perlu duplikasi kode atau risiko ketidaksesuaian antara sistem aplikasi dan database.
+Function ini digunakan langsung dalam sebuah file secara langsung di file task.php. Fungsi dari function ini adalah untuk menampilkan jumlah task yang dimiki dalam halaman website dalam satu waktu. Berikut ini adalah dokumentasi dari function
 
 ![Function](assets/img/function.png)
 
-* Aplikasi
 
-  `home.php`
-  ```php
-  $balance = $accountModel->getBalance($userId);
-  ```
-  ```html
-  <div class="d-flex align-items-center me-2">
-      <span class="me-1 text-secondary">Balance:</span>
-      <span class="fw-semibold fs-5 ms-1">Rp</span>
-      <span id="balance" class="fs-4 fw-semibold ms-1"
-          data-real-balance="<?= number_format($balance, 2, ',', '.') ?>">••••••••</span>
-  </div>
-  ```
-
-  `App/Models/Account.php`
-  ```php
-  $stmt = $this->conn->prepare("SELECT get_balance(?) AS balance");
-  $stmt->execute([$accountNumber]);
-  $result = $stmt->fetch(PDO::FETCH_ASSOC);
-  ```
-* Procedure `transfer_money`
-  ```sql
-  SET v_balance = get_balance(p_from_account);
-
-  IF v_balance < p_amount THEN
-      SIGNAL SQLSTATE '45000' 
-      SET MESSAGE_TEXT = 'Insufficient balance',
-          MYSQL_ERRNO = 1647;
-  END IF;
-  ```
-Penggunaan function seperti ini mencerminkan praktik pemisahan logika bisnis di database layer, yang relevan dalam konteks Pemrosesan Data Terdistribusi — di mana konsistensi dan reliabilitas antar node atau proses sangat krusial.
 
 ### 🔄 Backup Otomatis
 Untuk menjaga ketersediaan dan keamanan data, sistem dilengkapi fitur backup otomatis menggunakan `mysqldump`dan task scheduler. Backup dilakukan secara berkala dan disimpan dengan nama file yang mencakup timestamp, sehingga mudah ditelusuri. Semua file disimpan di direktori `storage/backups`.
