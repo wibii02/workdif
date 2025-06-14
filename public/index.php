@@ -18,20 +18,27 @@ require_once __DIR__ . '/../models/User.php';
 require_once __DIR__ . '/../models/Project.php';
 require_once __DIR__ . '/../models/Task.php';
 
-// 4. Periksa Status Otentikasi Pengguna
-if (!isset($_SESSION['user_id'])) {
-    header("Location: index.php?route=login"); 
-    exit;
-}
-
-// --- START PERUBAHAN UTAMA DI SINI ---
-
 // 5. Penanganan Routing Permintaan
 // Ambil rute dari parameter GET 'route'. Jika tidak ada, default ke 'dashboard'.
 $route = $_GET['route'] ?? 'dashboard'; 
 
+// --- START PERUBAHAN PENTING DI SINI ---
+
+// Rute yang TIDAK memerlukan login (whitelist)
+$public_routes = ['login', 'register', 'logout']; // Tambahkan 'register' jika Anda punya halaman registrasi
+
+// 4. Periksa Status Otentikasi Pengguna
+// Lakukan redirect HANYA jika pengguna belum login DAN rute yang diminta BUKAN rute publik
+if (!isset($_SESSION['user_id']) && !in_array($route, $public_routes)) {
+    header("Location: index.php?route=login"); 
+    exit;
+}
+
+// --- END PERUBAHAN PENTING ---
+
+
 // Menggunakan struktur switch-case sederhana untuk routing
-switch ($route) { // Menggunakan $route alih-alih $request_uri
+switch ($route) { // Menggunakan $route
     case 'dashboard': 
         include __DIR__ . '/../views/dashboard.php';
         break;
@@ -57,8 +64,19 @@ switch ($route) { // Menggunakan $route alih-alih $request_uri
         break;
 
     case 'login':
-        include __DIR__ . '/../views/login.php';
-        break;
+        // Jika sudah login tapi akses halaman login, bisa di-redirect ke dashboard
+        if (isset($_SESSION['user_id'])) {
+             header("Location: index.php?route=dashboard");
+             exit;
+        }
+        
+        // --- BARIS DEBUGGING DI SINI SUDAH DIHAPUS ---
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            require_once __DIR__ . '/../controllers/AuthController.php';
+        } else {
+            include __DIR__ . '/../views/login.php';
+        }
+        break; // break untuk case 'login'
 
     case 'logout':
         session_destroy();
@@ -71,5 +89,4 @@ switch ($route) { // Menggunakan $route alih-alih $request_uri
         echo "<p>Maaf, halaman yang Anda cari tidak ditemukan.</p>";
         break;
 }
-// --- END PERUBAHAN UTAMA DI SINI ---
 ?>
