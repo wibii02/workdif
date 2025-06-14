@@ -44,8 +44,8 @@ $pendingTasksCount = getPendingTasksCountForProjectAndUser($project_id, $_SESSIO
 <head>
     <meta charset="UTF-8">
     <title>Tugas Proyek: <?= htmlspecialchars($project['nama_projek']); ?></title>
-    <style>
-        /* General Body Styling */
+<style>
+            /* General Body Styling */
 body { 
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     margin: 0;
@@ -274,7 +274,7 @@ tbody tr:hover {
         color: #555;
     }
 }
-    </style>
+</style>
 </head>
 <body>
     <div class="container">
