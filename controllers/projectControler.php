@@ -12,7 +12,7 @@
 if (isset($_POST['tambah_project'])) {
     if (!isset($_SESSION['user_id'])) {
         // PENTING: Arahkan ke rute login, bukan dashboard views
-        header("Location: index.php?route=login"); 
+        header("Location: index.php?route=login");
         exit;
     }
 
@@ -34,15 +34,21 @@ if (isset($_POST['tambah_project'])) {
         $stmt->execute([$nama, $deskripsi, $user_id, $deadline]);
 
         // PENTING: Redirect ke rute dashboard setelah tambah proyek berhasil
-        header("Location: index.php?route=dashboard&success=project_added"); 
+        header("Location: index.php?route=dashboard&success=project_added");
         exit;
     } catch (PDOException $e) {
-        error_log("Error adding project: " . $e->getMessage()); 
+        error_log("Error adding project: " . $e->getMessage());
         // PENTING: Redirect ke rute tambah_project dengan pesan error database
         header("Location: index.php?route=tambah_project&error=db_error&msg=" . urlencode($e->getMessage()));
         exit;
     }
 }
+function deleteProject($projectId, $userId, $pdo)
+{
+    $stmt = $pdo->prepare("DELETE FROM projects WHERE id = ? AND user_id = ?");
+    $stmt->execute([$projectId, $userId]);
+}
+
 
 // Tidak ada logika lain di ProjectController.php untuk skenario ini (GET request),
 // karena logika GET untuk menampilkan proyek di dashboard.php sudah ada di views/dashboard.php

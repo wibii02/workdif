@@ -20,7 +20,7 @@ require_once __DIR__ . '/../models/Task.php';
 
 // 5. Penanganan Routing Permintaan
 // Ambil rute dari parameter GET 'route'. Jika tidak ada, default ke 'dashboard'.
-$route = $_GET['route'] ?? 'dashboard'; 
+$route = $_GET['route'] ?? 'dashboard';
 
 // --- START PERUBAHAN PENTING DI SINI ---
 
@@ -30,7 +30,7 @@ $public_routes = ['login', 'register', 'logout']; // Tambahkan 'register' jika A
 // 4. Periksa Status Otentikasi Pengguna
 // Lakukan redirect HANYA jika pengguna belum login DAN rute yang diminta BUKAN rute publik
 if (!isset($_SESSION['user_id']) && !in_array($route, $public_routes)) {
-    header("Location: index.php?route=login"); 
+    header("Location: index.php?route=login");
     exit;
 }
 
@@ -39,7 +39,7 @@ if (!isset($_SESSION['user_id']) && !in_array($route, $public_routes)) {
 
 // Menggunakan struktur switch-case sederhana untuk routing
 switch ($route) { // Menggunakan $route
-    case 'dashboard': 
+    case 'dashboard':
         include __DIR__ . '/../views/dashboard.php';
         break;
 
@@ -47,7 +47,7 @@ switch ($route) { // Menggunakan $route
         include __DIR__ . '/../views/project_tasks.php';
         break;
 
-    case 'tambah_project': 
+    case 'tambah_project':
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             require_once __DIR__ . '/../controllers/projectControler.php';
         } else {
@@ -66,10 +66,10 @@ switch ($route) { // Menggunakan $route
     case 'login':
         // Jika sudah login tapi akses halaman login, bisa di-redirect ke dashboard
         if (isset($_SESSION['user_id'])) {
-             header("Location: index.php?route=dashboard");
-             exit;
+            header("Location: index.php?route=dashboard");
+            exit;
         }
-        
+
         // --- BARIS DEBUGGING DI SINI SUDAH DIHAPUS ---
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             require_once __DIR__ . '/../controllers/AuthController.php';
@@ -80,7 +80,12 @@ switch ($route) { // Menggunakan $route
 
     case 'logout':
         session_destroy();
-        header("Location: index.php?route=login"); 
+        header("Location: index.php?route=login");
+        exit;
+    case 'hapus_project':
+        require_once __DIR__ . '/../controllers/projectControler.php';
+        deleteProject($_POST['project_id'], $_SESSION['user_id'], $pdo);
+        header('Location: index.php?route=dashboard&success=project_deleted');
         exit;
 
     default:
