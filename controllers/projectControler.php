@@ -27,9 +27,9 @@ if (isset($_POST['tambah_project'])) {
         exit;
     }
 
+    // Panggil fungsi dari model Project.php untuk menambah proyek
+    // Menggunakan stored procedure 'TambahProjek'
     try {
-        // Panggil fungsi dari model Project.php untuk menambah proyek
-        // Menggunakan stored procedure 'TambahProjek'
         $stmt = $pdo->prepare("CALL TambahProjek(?, ?, ?, ?)");
         $stmt->execute([$nama, $deskripsi, $user_id, $deadline]);
 
@@ -43,11 +43,23 @@ if (isset($_POST['tambah_project'])) {
         exit;
     }
 }
-function deleteProject($projectId, $userId, $pdo)
-{
-    $stmt = $pdo->prepare("DELETE FROM projects WHERE id = ? AND user_id = ?");
-    $stmt->execute([$projectId, $userId]);
+function deleteProject($projectId, $userId, $pdo){
+    try {
+        $stmt = $pdo->prepare("CALL HapusProjek(?, ?)");
+        $stmt->execute([$projectId, $userId]);
+
+        header("Location: index.php?route=dashboard&success=project_deleted");
+        exit;
+    } catch (PDOException $e) {
+        $errorMessage = $e->getMessage();
+        error_log("Error deleting project: " . $errorMessage);
+
+        header("Location: index.php?route=dashboard&error=db_error&msg=" . urlencode($errorMessage));
+        exit;
+    }
 }
+
+
 
 
 // Tidak ada logika lain di ProjectController.php untuk skenario ini (GET request),

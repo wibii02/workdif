@@ -52,59 +52,65 @@ if (isset($_GET['success']) && $_GET['success'] == 'task_added') {
 
 <!DOCTYPE html>
 <html lang="id">
+
 <head>
     <meta charset="UTF-8">
     <title>Tambah Task</title>
-    <style>
-        body { font-family: Arial; margin: 2rem; }
-        form { margin-top: 20px; padding: 20px; border: 1px solid #ddd; border-radius: 5px; max-width: 500px; }
-        label { display: block; margin-bottom: 5px; font-weight: bold; }
-        input[type="text"], input[type="number"], input[type="date"], textarea {
-            width: calc(100% - 22px);
-            padding: 10px;
-            margin-bottom: 15px;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-        }
-        button {
-            background-color: #007bff;
-            color: white;
-            padding: 10px 15px;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 1em;
-        }
-        button:hover { background-color: #0056b3; }
-        a { display: inline-block; margin-top: 10px; text-decoration: none; color: #007bff; }
-    </style>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
-<body>
-    <h1>Tambah Task</h1>
-    <?php if ($projectName): ?>
-        <p>Untuk Proyek: <strong><?= $projectName; ?></strong></p>
-    <?php endif; ?>
 
-    <?php echo $message; ?>
+<body class="bg-light">
+    <div class="container my-5">
+        <div class="card shadow-sm">
+            <div class="card-body">
+                <h1 class="card-title mb-4">Tambah Task</h1>
 
-    <form method="POST" action="index.php?route=tambah_task">
-        <input type="hidden" name="project_id" value="<?= htmlspecialchars($project_id); ?>"> 
-        
-        <label for="judul">Judul Task:</label>
-        <input type="text" id="judul" name="judul" placeholder="Judul Task" required>
-        
-        <label for="deskripsi">Deskripsi Task:</label>
-        <textarea id="deskripsi" name="deskripsi" placeholder="Deskripsi Task"></textarea>
-        
-        <label for="assigned_to">User ID Penanggung Jawab:</label>
-        <input type="number" id="assigned_to" name="assigned_to" placeholder="User ID Penanggung Jawab" required>
-        
-        <label for="deadline">Deadline:</label>
-        <input type="date" id="deadline" name="deadline" required>
-        
-        <button type="submit" name="tambah_task">Tambah Task</button>
-    </form>
-    
-    <a href="index.php?route=project_tasks&project_id=<?= htmlspecialchars($project_id); ?>">← Kembali</a>
+                <?php if ($projectName): ?>
+                    <p>Untuk Proyek: <strong class="text-primary"><?= $projectName; ?></strong></p>
+                <?php endif; ?>
+
+                <?php if ($message): ?>
+                    <div class="alert <?= strpos($message, 'berhasil') !== false ? 'alert-success' : 'alert-danger' ?>"
+                        role="alert">
+                        <?= $message; ?>
+                    </div>
+                <?php endif; ?>
+
+                <form method="POST" action="index.php?route=tambah_task">
+                    <input type="hidden" name="project_id" value="<?= htmlspecialchars($project_id); ?>">
+
+                    <div class="mb-3">
+                        <label for="judul" class="form-label">Judul Task</label>
+                        <input type="text" class="form-control" id="judul" name="judul" placeholder="Judul Task"
+                            required>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="deskripsi" class="form-label">Deskripsi Task</label>
+                        <textarea class="form-control" id="deskripsi" name="deskripsi" rows="4"
+                            placeholder="Deskripsi Task"></textarea>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="assigned_to" class="form-label">User ID Penanggung Jawab</label>
+                        <input type="number" class="form-control" id="assigned_to" name="assigned_to"
+                            placeholder="User ID Penanggung Jawab" required>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="deadline" class="form-label">Deadline</label>
+                        <input type="date" class="form-control" id="deadline" name="deadline" required>
+                    </div>
+
+                    <button type="submit" name="tambah_task" class="btn btn-success">Tambah Task</button>
+                    <a href="index.php?route=project_tasks&project_id=<?= htmlspecialchars($project_id); ?>"
+                        class="btn btn-link">← Kembali</a>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
+
 </html>

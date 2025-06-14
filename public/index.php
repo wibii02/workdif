@@ -83,10 +83,12 @@ switch ($route) { // Menggunakan $route
         header("Location: index.php?route=login");
         exit;
     case 'hapus_project':
-        require_once __DIR__ . '/../controllers/projectControler.php';
-        deleteProject($_POST['project_id'], $_SESSION['user_id'], $pdo);
-        header('Location: index.php?route=dashboard&success=project_deleted');
-        exit;
+        if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['project_id'])) {
+            require_once __DIR__ . '/../controllers/projectControler.php';
+
+            deleteProject($_POST['project_id'], $_SESSION['user_id'], $pdo);
+        }
+        break;
 
     default:
         header("HTTP/1.0 404 Not Found");
