@@ -124,9 +124,9 @@ Function ini digunakan langsung dalam sebuah file secara langsung di file task.p
 ### 🔄 Backup Otomatis
 Untuk menjaga ketersediaan dan keamanan data, sistem dilengkapi fitur backup otomatis menggunakan `mysqldump`dan task scheduler. Backup dilakukan secara berkala dan disimpan dengan nama file yang mencakup timestamp, sehingga mudah ditelusuri. Semua file disimpan di direktori `D:\WORKHARD\Backup Data`.
 
-![Function](assets/img/taskScheduler.png)
-![Function](assets/img/fileBackup.png)
-![Function](assets/img/scriptbackup.png)
+![Backup](assets/img/taskScheduler.png)
+![Backup](assets/img/fileBackup.png)
+![Backup](assets/img/scriptbackup.png)
  
 
 ## 🧩 Relevansi Proyek dengan Pemrosesan Data Terdistribusi
