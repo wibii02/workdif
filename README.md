@@ -126,41 +126,8 @@ Untuk menjaga ketersediaan dan keamanan data, sistem dilengkapi fitur backup oto
 
 ![Function](assets/img/taskScheduler.png)
 ![Function](assets/img/fileBackup.png)
-
-`srcriptbackup`
-  @echo off
-  setlocal enabledelayedexpansion
-
-  :: LOG AWAL
-  echo [%date% %time%] Menjalankan backup_debug.bat >> "D:\WORKHARD\Backup Data\debug_task.txt"
-
-  :: KONFIGURASI
-  set "backupDir=D:\WORKHARD\Backup Data"
-  set "mysqlBinDir=D:\APK\Laragon\laragon\bin\mysql\mysql-8.0.30-winx64\bin"
-  set "database=manajemen_pekerjaan"
-  set "user=root"
-  set "password="
-
-  :: TIMESTAMP
-  set "year=%date:~6,4%"
-  set "month=%date:~3,2%"
-  set "day=%date:~0,2%"
-  set "hour=%time:~0,2%"
-  set "minute=%time:~3,2%"
-  if "%hour:~0,1%"==" " set "hour=0%hour:~1,1%"
-  set "timestamp=%year%-%month%-%day%_%hour%-%minute%"
-
-  :: CEK FOLDER BACKUP
-  if not exist "%backupDir%" (
-      mkdir "%backupDir%"
-      echo [%date% %time%] Membuat folder backup >> "%backupDir%\debug_task.txt"
-  )
-
-  :: JALANKAN BACKUP
-  "%mysqlBinDir%\mysqldump.exe" -u %user% %database% --result-file="%backupDir%\backup_%timestamp%.sql" > "%backupDir%\debug_output.log" 2>&1
-
-
-  endlocal
+![Function](assets/img/scriptbackup.png)
+ 
 
 ## 🧩 Relevansi Proyek dengan Pemrosesan Data Terdistribusi
 Sistem ini dirancang dengan memperhatikan prinsip-prinsip dasar pemrosesan data terdistribusi:
