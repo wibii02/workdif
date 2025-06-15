@@ -124,16 +124,43 @@ Function ini digunakan langsung dalam sebuah file secara langsung di file task.p
 ### 🔄 Backup Otomatis
 Untuk menjaga ketersediaan dan keamanan data, sistem dilengkapi fitur backup otomatis menggunakan `mysqldump`dan task scheduler. Backup dilakukan secara berkala dan disimpan dengan nama file yang mencakup timestamp, sehingga mudah ditelusuri. Semua file disimpan di direktori `storage/backups`.
 
-`backup.php`
-```php
-<?php
-require_once __DIR__ . '/init.php';
+![Function](assets/img/taskScheduler.png)
+![Function](assets/img/fileBackup.png)
 
-$date = date('Y-m-d_H-i-s');
-$backupFile = __DIR__ . "/storage/backups/pdtbank_backup_$date.sql";
-$command = "\"C:\\laragon\\bin\\mysql\\mysql-8.0.30-winx64\\bin\\mysqldump.exe\" -u " . DB_USER . " " . DB_NAME . " > \"$backupFile\"";
-exec($command);
-```
+`srcriptbackup`
+  @echo off
+  setlocal enabledelayedexpansion
+
+  :: LOG AWAL
+  echo [%date% %time%] Menjalankan backup_debug.bat >> "D:\WORKHARD\Backup Data\debug_task.txt"
+
+  :: KONFIGURASI
+  set "backupDir=D:\WORKHARD\Backup Data"
+  set "mysqlBinDir=D:\APK\Laragon\laragon\bin\mysql\mysql-8.0.30-winx64\bin"
+  set "database=manajemen_pekerjaan"
+  set "user=root"
+  set "password="
+
+  :: TIMESTAMP
+  set "year=%date:~6,4%"
+  set "month=%date:~3,2%"
+  set "day=%date:~0,2%"
+  set "hour=%time:~0,2%"
+  set "minute=%time:~3,2%"
+  if "%hour:~0,1%"==" " set "hour=0%hour:~1,1%"
+  set "timestamp=%year%-%month%-%day%_%hour%-%minute%"
+
+  :: CEK FOLDER BACKUP
+  if not exist "%backupDir%" (
+      mkdir "%backupDir%"
+      echo [%date% %time%] Membuat folder backup >> "%backupDir%\debug_task.txt"
+  )
+
+  :: JALANKAN BACKUP
+  "%mysqlBinDir%\mysqldump.exe" -u %user% %database% --result-file="%backupDir%\backup_%timestamp%.sql" > "%backupDir%\debug_output.log" 2>&1
+
+
+  endlocal
 
 ## 🧩 Relevansi Proyek dengan Pemrosesan Data Terdistribusi
 Sistem ini dirancang dengan memperhatikan prinsip-prinsip dasar pemrosesan data terdistribusi:
