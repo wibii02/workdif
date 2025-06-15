@@ -131,6 +131,8 @@ Untuk menjaga ketersediaan dan keamanan data, sistem dilengkapi fitur backup oto
 
 ## 🧩 Relevansi Proyek dengan Pemrosesan Data Terdistribusi
 Sistem ini dirancang dengan memperhatikan prinsip-prinsip dasar pemrosesan data terdistribusi:
-* **Konsistensi**: Semua transaksi dieksekusi dengan procedure dan validasi terpusat di database.
-* **Reliabilitas**: Trigger dan transaction memastikan sistem tetap aman meskipun ada error atau interupsi.
-* **Integritas**: Dengan logika disimpan di dalam database, sistem tetap valid walaupun dipanggil dari banyak sumber (web, API, dsb).
+* **Konsistensi**: WorkDiff menggunakan stored procedure dan validasi database untuk memastikan bahwa setiap transaksi dilakukan sesuai aturan sistem. Semua input dan perubahan data dilakukan melalui jalur yang telah ditentukan, sehingga meskipun data diakses dari berbagai interface hasil akhir tetap konsisten dan tidak menimbulkan konflik antar data.
+
+* **Reliabilitas**: Dengan menerapkan transaction dan trigger di tingkat database, WorkDiff mampu menjaga kestabilan data bahkan jika terjadi error saat proses dijalankan. Setiap perubahan penting seperti penambahan, penghapusan, atau update tugas dicatat secara otomatis melalui trigger ke dalam activity_logs, memastikan sistem memiliki jejak audit yang kuat. Jika terjadi gangguan, sistem akan melakukan rollback untuk menghindari data tidak sinkron.
+
+* **Integritas**: Integritas data dijaga melalui pemisahan logika bisnis ke dalam stored procedure dan function. Hal ini memastikan bahwa validasi dan pemrosesan data tetap berlaku secara konsisten, terlepas dari bagaimana atau dari mana permintaan dilakukan.
